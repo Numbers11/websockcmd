@@ -1,0 +1,28 @@
+{
+  "name": "websockcmd",
+  "version": "0.0.1",
+  "description": "uber 1337 reverse shell using websockets (node.js part)",
+  "main": "app.js",
+  "dependencies": {
+    "cookie": "~0.1.0",
+    "express": "~3.3.4",
+    "websocket": "~1.0.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Numbers11/websockcmd.git"
+  },
+  "keywords": [
+    "node.js",
+    "reverse",
+    "shell",
+    "1337"
+  ],
+  "author": "Zephyr",
+  "license": "BSD",
+  "gitHead": "8af89659bbb25b38d90a730be40cf21770d2069f"
+}
