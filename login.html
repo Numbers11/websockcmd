@@ -1,0 +1,51 @@
+<html>  
+<head>  
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>  
+<script src="javascripts/jquery.terminal-0.7.3.js"></script> 
+<script src="javascripts/jquery.mousewheel.js"></script>
+<link rel="stylesheet" type="text/css" href="stylesheets/jquery.terminal.css">
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+<title>~</title>  
+<script type="text/javascript">
+	$(document).ready(function() {  
+////////////////////////terminal
+
+
+    $('#term_demo').terminal(function(command, term) {
+        if (command !== '') {
+            $.post("/login", {pw: command}, function(data) {
+              if (data == 'success') {
+                term.echo('Successfully logged in, redirecting ...');
+                window.location.reload();
+              } else {
+                term.error('Wrong password!');
+              }
+            });
+        } else {
+           term.echo('');
+        }
+    }, {
+        greetings: 
+'                                                             ' + '\r\n' +
+'    _/                            _/                         ' + '\r\n' +
+'   _/          _/_/      _/_/_/      _/_/_/                  ' + '\r\n' +
+'  _/        _/    _/  _/    _/  _/  _/    _/                 ' + '\r\n' +
+' _/        _/    _/  _/    _/  _/  _/    _/                  ' + '\r\n' +
+'_/_/_/_/    _/_/      _/_/_/  _/  _/    _/      _/  _/  _/   ' + '\r\n' +
+'                         _/                                  ' + '\r\n' +
+'                    _/_/                                     ' + '\r\n'
+        ,
+        name: 'js_login',
+        height: 200,
+        prompt: 'Password> '});
+
+
+	}); 
+</script>    
+</head>  
+<body class="terminal">  
+
+<div id="term_demo"></div>
+<div id="zero"></id>
+</body>  
+</html>​  

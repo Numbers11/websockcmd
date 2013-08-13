@@ -1,0 +1,136 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>  
+<script src="javascripts/jquery.terminal-0.7.3.js"></script> 
+<script src="javascripts/jquery.mousewheel.js"></script>
+<link rel="stylesheet" type="text/css" href="stylesheets/jquery.terminal.css">
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+<title>~</title>  
+<script type="text/javascript">
+	$(document).ready(function() {
+    var greeting = '__________                                          ________.__           .__  .__   \r\n\\______   \\ _______  __ ___________ ______ ____    \/   _____|  |__   ____ |  | |  |  \r\n |       __\/ __ \\  \\\/ _\/ __ \\_  __ \/  ____\/ __ \\   \\_____  \\|  |  \\_\/ __ \\|  | |  |  \r\n |    |   \\  ___\/\\   \/\\  ___\/|  | \\\\___ \\\\  ___\/   \/        |   Y  \\  ___\/|  |_|  |__\r\n |____|_  \/\\___  >\\_\/  \\___  |__| \/____  >\\___  > \/_______  |___|  \/\\___  |____|____\/\r\n        \\\/     \\\/          \\\/          \\\/     \\\/          \\\/     \\\/     \\\/           \r\n13zephyr37@mail.ru                                         v. 1337\r\n\r\n\r\n> Written in node.js & Delphi - free to use and modify for everybody';
+
+        var workingdir = '>'  
+        var activeconnection = -1;
+    	var connection = new WebSocket('ws://localhost:81/master');
+    	connection.onclose = function () {
+            terminal.error('Socket connection was closed. Try reloading!');
+    	};
+
+    	// Log errors
+    	connection.onerror = function (error) {
+    	  console.log('WebSocket Error ' + error);
+    	};
+
+    	// Log messages from the server
+    	connection.onmessage = function (e) {
+    	  console.log('Server: ' + e.data);
+            var message = JSON.parse(e.data);
+            if (message.type == 'cmdreply') {
+                //workingdir = message.msg.substring(0, message.msg.lastIndexOf("\n"));
+                console.log(workingdir);
+                var lines = message.msg.split('\r\n');
+                message.msg = message.msg.substring(0, message.msg.lastIndexOf("\n"));
+                var qdir = lines[lines.length - 1];
+                if (qdir) workingdir = qdir;    
+                terminal.echo(message.msg);
+                terminal.resume();
+            } else if (message.type == 'clientlist') {
+                console.log('>>>' + message.clients);
+                $( "#container" ).empty();
+                $( '<p style="cursor:pointer" class="back"><< Back</p>' ).appendTo( "#container" ).click(
+                    function() {
+                        if (activeconnection > -1) {
+                              //send close
+                              connection.send(JSON.stringify({ id: activeconnection, msg: 'stopsession'}));
+                        }
+                        activeconnection = -1;
+                        workingdir='>';
+                        terminal.clear();
+                        terminal.echo(greeting);
+
+                        $("#container>p.active").removeClass("active"); 
+
+                });
+                for (var i = 0; i < message.clients.length; i++) {
+                    var item = $( '<p style="cursor:pointer" id="' + message.clients[i].id + '">-> ' + message.clients[i].ip + '</p>' ).appendTo( "#container" );
+                    if (activeconnection == message.clients[i].id) {
+                        item.addClass('active');
+                    }
+                    item.click(function() {
+                        console.log(this);
+                        $("#container>p.active").removeClass("active");
+                        $(this).addClass('active');
+                        terminal.clear();
+                        if (activeconnection > -1) {
+                              //send close to old connection
+                              connection.send(JSON.stringify({ id: activeconnection, msg: 'stopsession'}));
+                        }
+                        activeconnection = $(this).attr('id');
+                        //send startsession
+                        connection.send(JSON.stringify({ id: activeconnection, msg: 'startsession'}));
+                    });
+                }
+                //detect if the active connection closed
+                if ($("#container>p.active").length == 0 && activeconnection > -1) {
+                    terminal.error('This connection was closed on the client side.');
+                    activeconnection = -1;
+                }
+            } else {
+                console.log('lol i dunno: ', e.data);
+            }
+    	};
+    ////////////////////////terminal
+        var terminal = $('#term_demo').terminal(function(command, term) {
+            if (command !== '') {
+                if (activeconnection > -1) {
+                    connection.send(JSON.stringify({ id: activeconnection, msg: command}));
+                    term.pause();
+                } else {
+                    term.error('No active connection!')
+                }
+
+            } else {
+               term.echo('');
+            }
+        }, {
+            name: 'js_term',
+            greetings: greeting,
+            height: $(window).height() - 70,
+            prompt: function(callback) {
+                callback(workingdir);
+            }
+        });
+        $(window).resize(function() {
+           terminal.css('height', $(window).height()-70);
+        }).resize();
+	}); 
+
+
+    
+</script>    
+</head>  
+<body  class="terminal">  
+<div style="height: 100%; width: 200px; float: left; ">
+<div id="wrapper">  
+  
+    <div id="container">  
+  
+    <p class="active">-x-</p>
+    </div><!-- #container -->  
+  
+</div>
+</div>
+
+<div style="height: 100%; margin-left: 200px; border-left-style: solid; border-left-color: lime; border-left-width: 1px;">
+<div id="term_demo" style="height: 100%">
+
+</div>
+</div>
+<div id="zero"></div
+
+
+
+</body>  
+</html>​  
